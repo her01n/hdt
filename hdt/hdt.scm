@@ -161,9 +161,10 @@
   (run-tests
     (collect-tests
       (lambda ()
-        (for-each
-          (lambda (file)
+        (ftw "test"
+          (lambda (file s f)
             (if (string-suffix? ".scm" file)
-              (load-from-path (format #f "test/~a" file))))
-          (scandir "test"))))))
+              (load-from-path file))
+            #t))))))
+              
 
