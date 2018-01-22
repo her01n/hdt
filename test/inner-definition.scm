@@ -24,4 +24,10 @@
         (test child
           (assert (equal? a 7))))))
   (assert result "variable is accesible from child test"))
-  
+
+(test inner-procedure
+  (define (proc arg)
+    (assert (equal? arg "arg"))
+    "result")
+  (define (simple arg) #t)
+  (assert (equal? "result" (proc "arg"))))

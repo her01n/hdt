@@ -12,7 +12,7 @@
     (set! tests (cdr tests))
     (reverse collected)))
 
-(define tests '())
+(define tests '(() ()))
 
 (define (register-test test-name proc)
   (define name-string
@@ -30,6 +30,10 @@
 
 (define-syntax test'
   (syntax-rules (define test)
+    ((test' (define (proc-name args ...) proc-expr ...) test-expr ...)
+      (let ((proc-name #f)
+            (proc-proc (lambda (args ...) proc-expr ...)))
+        (test' (set! proc-name proc-proc) test-expr ...)))
     ((test' (define var-name var-expr) expr ...)
       (let ((var-name #f)
             (evaluate (lambda () var-expr)))
