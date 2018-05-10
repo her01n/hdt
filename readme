@@ -1,0 +1,108 @@
+hdt is an automatic test unit framework consisting of a guile module with test, assert macros 
+and command line test runner.
+
+  install
+
+$ git clone https://github.com/her01n/hdt
+$ cd hdt
+$ sudo make install
+
+Make sure /usr/local/lib/guile is in your guile path. For debian you can do:
+
+$ sudo sh -c echo GUILE_PATH=/usr/local/lib/guile >> /etc/environment
+
+and restart your shell.
+After installation run 'hdt' in the project directory to check everything works.
+
+  assert macro
+
+syntax: (assert expr [message])
+
+Evaluates an expression and fails the current test if the result is #f. The message will be displayed 
+in the report in case of failure. For some functions and macros the arguments are evaluated beforehand, 
+and displayed in the test report. For example:
+
+(assert (equal? 4 (fun 2)))
+
+And the test report will display:
+
+assertion failed:
+  (equal? 4 (fun 2))
+  (equal? 4 7)
+
+This way, additional macros like assert-equal are not necessary.
+
+  test macro
+
+syntax: (test [name] expr...)
+
+Register a test to be consisted of the expressions. The test is considered passing 
+if evaluating expressions does not throw any exceptions and all assertions passes. 
+Test can start with inner definitions. Right now the definitions cannot use bindings introduced later.
+Tests could be nested. The nested tests execute the preceding expressions from the parent test first. 
+For example, to implement common setup code:
+
+(test root
+  (before)
+  (test first (a))
+  (test second (b)))
+
+will execute:
+
+(before) ; root
+ (before) (a) ; first
+(before) (b) ; second
+
+  hook macro
+
+syntax: (hook expr...)
+
+Shedules the expressions to be evaluated after the current test is done, in all cases.
+For example:
+
+(test
+  (setup)
+  (hook teardown)
+  (test ...)
+  (test ...))
+
+The expressions are evaluated only if execution reaches the hook macro. 
+So it have to be placed right after or even before the setup it needs to reverse. 
+Multiple hooks could be defined that would be executed in the opposite order as defined.
+
+  command hdt
+
+Loads and executes all tests under ./test directory. 
+Includes current working directory in the guile path (passing '-L .' argument). 
+The project orion layout may look like this:
+
+test/
+test/calc.hs
+orion/
+orion/calc.hs
+
+test/calc.hs:
+
+  (use-modules (hdt hdt))
+  (use-modules (orion calc))
+
+  (test add
+    (assert 7 (add 3 4)))
+
+orion/calc.hs:
+
+  (define-module (orion calc))
+
+  (define-public (add . args) 
+    #f)
+
+  open points
+
+More functions need to get special treatment by assert macro.
+throws-exceptions macro, that returns #t if the expression evaluation throws exception,
+  and #f if evaluates successfuly. this should also get special treatment in assert macro. 
+  That would require more work in assert.
+Skip running following nested tests if the root tets fails. Report the number of skipped tests.
+Allow nested tests inside 'map', 'if', 'foreach', and similar. This will require to rework the way
+  the tests are registered.
+
