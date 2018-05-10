@@ -1,0 +1,4 @@
+think of a name for the test framework
+make the documentation
+bin/hdt should return error if test fails
+
