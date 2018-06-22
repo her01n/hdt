@@ -7,11 +7,6 @@ $ git clone https://github.com/her01n/hdt
 $ cd hdt
 $ sudo make install
 
-Make sure /usr/local/lib/guile is in your guile path. For debian you can do:
-
-$ sudo sh -c echo GUILE_PATH=/usr/local/lib/guile >> /etc/environment
-
-and restart your shell.
 After installation run 'hdt' in the project directory to check everything works.
 
   assert macro
