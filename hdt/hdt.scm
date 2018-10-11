@@ -1,9 +1,9 @@
 (define-module (hdt hdt)
   #:export (run-tests collect-tests test-runner)
-  #:export-syntax (assert test hook))
+  #:export-syntax (assert test hook throws-exception))
 
 (use-modules (ice-9 ftw) (ice-9 match)
-             (srfi srfi-1))
+             ((srfi srfi-1) #:prefix srfi1-))
 
 (define (collect-tests thunk)
   (set! tests (cons '() tests))
@@ -16,7 +16,7 @@
 
 (define (register-test test-name proc)
   (define name-string
-    (if (every not test-name)
+    (if (srfi1-every not test-name)
       #f
       (string-join (map (lambda (name) (or name "")) (reverse test-name)) "/")))
   (define (the-test arg)
@@ -96,7 +96,7 @@
               errors)))
         tests)))
   (display "\n")
-  (if (every null? failures)
+  (if (srfi1-every null? failures)
     (begin
       (format #t "~a ok\n" (n-tests (length tests)))
       #t)
@@ -120,7 +120,7 @@
                       (display "\n"))))
                 failures)))) 
         tests failures)
-      (format #t "~a failed.\n" (n-tests (count (compose not null?) failures)))
+      (format #t "~a failed.\n" (n-tests (srfi1-count (compose not null?) failures)))
       #f)))
 
 (define (catch-error thunk)
@@ -142,6 +142,17 @@
           (args (string-join (map (lambda (arg) (format #f "~s" arg)) args) " ")))
       (throw 'assertion-failed message filename line (list expr (format #f "(~a ~a)" proc args))))))
 
+(define (execute-throws-check message filename line expr thunk)
+  (define value
+    (catch #t
+      (lambda () (thunk))
+      (lambda (key . args) 'hdt-exception)))
+  (if (not (equal? 'hdt-exception value))
+    (throw 'assertion-failed message filename line (list expr (format #f "(throws-exception ~a)" value)))))
+
+; TODO expand all procedures - can i tell what is a procedure and what an expanded macro?
+; does it matter?
+
 (define-syntax assert
   (lambda (x)
     (define source (syntax-source x))
@@ -150,13 +161,19 @@
     (syntax-case x ()
       ((assert check message)
         (let ((expr (with-output-to-string (lambda () (write (syntax->datum (syntax check)))))))
-          (syntax-case (syntax check) (equal? string-contains not)
+          (syntax-case (syntax check) (equal? string-contains not throws-exception member srfi1-member)
             ((equal? arg1 arg2)
               #`(execute-check message #,filename #,line #,expr equal? arg1 arg2))
             ((string-contains arg1 arg2)
               #`(execute-check message #,filename #,line #,expr string-contains arg1 arg2))
             ((not arg)
               #`(execute-check message #,filename #,line #,expr not arg))
+	    ((throws-exception arg)
+	      #`(execute-throws-check message #,filename #,line #,expr (lambda () arg)))
+            ((member arg1 arg2)
+              #`(execute-check message #,filename #,line #,expr member arg1 arg2))
+            ((srfi1-member arg1 arg2)
+              #`(execute-check message #,filename #,line #,expr srfi1-member arg1 arg2))
             (check
               #`(if (not check) (throw 'assertion-failed message #,filename #,line (list #,expr)))))))
       ((assert check) #`(assert check #f)))))
@@ -170,5 +187,13 @@
             (if (string-suffix? ".scm" file)
               (load-from-path file))
             #t))))))
-              
+
+; just for completeness.
+; it is not used in normal usage: (assert (throws-exception ...))
+(define-syntax throws-exception
+  (syntax-rules ()
+    ((throws-exception expr)
+      (catch #t
+        (lambda () expr #f)
+        (lambda (key . args) #t)))))
 

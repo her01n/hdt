@@ -49,3 +49,12 @@
         (define value "hey")
         (assert (not value)))))
   (assert (string-contains output "hey") "not argument is expanded"))
+
+(test "expand-member"
+  (define output
+    (test-output
+      (test "member"
+        (define f "foo")
+        (assert (member f '("bar" "baz"))))))
+  (assert (string-contains output "foo") "member's first argument is expanded"))
+

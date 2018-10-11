@@ -65,6 +65,16 @@ The expressions are evaluated only if execution reaches the hook macro.
 So it have to be placed right after or even before the setup it needs to reverse. 
 Multiple hooks could be defined that would be executed in the opposite order as defined.
 
+  throws-exception macro
+
+syntax: (throws-exception expr)
+
+Returns #t if evaluating expr throws any exception, #f otherwise. May be used to assert
+the failure path.
+For example:
+
+  (assert (throws-exception (/ 1 0)))
+
   command hdt
 
 Loads and executes all tests under ./test directory. 
@@ -94,10 +104,8 @@ orion/calc.hs:
   open points
 
 More functions need to get special treatment by assert macro.
-throws-exceptions macro, that returns #t if the expression evaluation throws exception,
-  and #f if evaluates successfuly. this should also get special treatment in assert macro. 
-  That would require more work in assert.
 Skip running following nested tests if the root tets fails. Report the number of skipped tests.
 Allow nested tests inside 'map', 'if', 'foreach', and similar. This will require to rework the way
-  the tests are registered.
+  the tests are registered. create function (execute-tests thunk) that will execute the tests defined inside the thunk?
+Collect the output of the tests, do not display it immediately, only display it in case of failure.
 
