@@ -1,3 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
-guile -L . -c "(begin (use-modules (hdt hdt)) (test-runner))"
+GUILE=${GUILE-guile}
+$GUILE -L . -c "(begin (use-modules (hdt hdt)) (test-runner))"
