@@ -179,14 +179,17 @@
       ((assert check) #`(assert check #f)))))
 
 (define (test-runner)
-  (run-tests
-    (collect-tests
-      (lambda ()
-        (ftw "test"
-          (lambda (file s f)
-            (if (string-suffix? ".scm" file)
-              (load-from-path file))
-            #t))))))
+  (if
+    (run-tests
+      (collect-tests
+        (lambda ()
+          (ftw "test"
+            (lambda (file s f)
+              (if (string-suffix? ".scm" file)
+                (load-from-path file))
+              #t)))))
+    (exit 0)
+    (exit 1)))  
 
 ; just for completeness.
 ; it is not used in normal usage: (assert (throws-exception ...))
