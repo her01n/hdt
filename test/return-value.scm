@@ -17,7 +17,7 @@
          (status 
            (system
              (string-append 
-               "cd /tmp/hdt; env GUILE_LOAD_PATH=" dir " " 
+               "cd tmp; env GUILE_LOAD_PATH=" dir " " 
                dir "/bin/hdt 2>&1 >/dev/null"))))
     (assert (not (equal? 0 (status:exit-val status))))
     (close-pipe pipe)))

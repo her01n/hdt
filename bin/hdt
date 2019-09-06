@@ -1,4 +1,5 @@
 #!/bin/bash
 
 GUILE=${GUILE-guile}
-$GUILE -L . -c "(begin (use-modules (hdt hdt)) (test-runner))"
+HDT_PATH=$(dirname $(dirname $(realpath -s $0)))
+$GUILE -L $HDT_PATH -L . -c "(begin (use-modules (hdt hdt)) (test-runner))"
