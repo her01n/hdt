@@ -13,6 +13,9 @@ install: .tested
 	mkdir -p $(GUILE_SITE)/hdt
 	install -t $(GUILE_SITE)/hdt hdt/*
 
+clean:
+	rm -rf .tested
+
 uninstall:
 	rm -rf /usr/local/bin/hdt
 	rm -rf $(GUILE_SITE)/hdt

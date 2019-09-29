@@ -5,6 +5,7 @@ and command line test runner.
 
 $ git clone https://github.com/her01n/hdt
 $ cd hdt
+$ make
 $ sudo make install
 
 After installation run 'hdt' in the project directory to check everything works.
