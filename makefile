@@ -1,13 +1,19 @@
-default: test
-test: bin/hdt test/*.scm hdt/*.scm
+default: .tested
+
+GUILE_CONFIG ?= guile-config
+GUILE_SITE ?= $(shell $(GUILE_CONFIG) info sitedir)
+
+.tested: bin/hdt test/*.scm hdt/*.scm
 	rm -rf ~/.cache/guile
 	bin/hdt
-install: test
+	touch $@
+
+install: .tested
 	install bin/hdt /usr/local/bin/hdt
-	mkdir -p /usr/share/guile/site/hdt
-	install -t /usr/share/guile/site/hdt hdt/*
+	mkdir -p $(GUILE_SITE)/hdt
+	install -t $(GUILE_SITE)/hdt hdt/*
+
 uninstall:
 	rm -rf /usr/local/bin/hdt
-	rm -rf /usr/share/guile/site/hdt
+	rm -rf $(GUILE_SITE)/hdt
 
-.PHONY: test
