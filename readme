@@ -66,6 +66,15 @@ The expressions are evaluated only if execution reaches the hook macro.
 So it have to be placed right after or even before the setup it needs to reverse. 
 Multiple hooks could be defined that would be executed in the opposite order as defined.
 
+As a special case, hook macro used outside a test would be executed once,
+after all tests finish, successfuly or otherwise.
+This way, one time initialization and clean up can be performed:
+
+    (one-time-setup)
+    (hook (one-time-teardown))
+    (test ...)
+    (test ...)
+
   throws-exception macro
 
 syntax: (throws-exception expr)

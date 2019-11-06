@@ -28,7 +28,7 @@
 (define test-proc (make-fluid (lambda () #f)))
 (define test-name (make-fluid '()))
 
-(define-syntax test'
+(define-syntax test'	
   (syntax-rules (define test)
     ((test' (define (proc-name args ...) proc-expr ...) test-expr ...)
       (let ((proc-name #f)
@@ -85,16 +85,19 @@
   (define failures
     (filter
       identity
-      (map 
-        (lambda (test)
-          (with-fluid* hooks '()
-            (lambda ()
-              (define test-error (catch-error (lambda () (test 'execute))))
-              (define hook-errors (map catch-error (fluid-ref hooks)))
-              (define errors (filter identity (cons test-error hook-errors)))
-              (if (null? errors) (display ".") (display "F"))
-              errors)))
-        tests)))
+      (append
+        (map
+          (lambda (test)
+            (with-fluid* hooks '()
+              (lambda ()
+                (define test-error (catch-error (lambda () (test 'execute))))
+                (define hook-errors (map catch-error (fluid-ref hooks)))
+                (define errors (filter identity (cons test-error hook-errors)))
+                (if (null? errors) (display ".") (display "F"))
+                errors)))
+          tests)
+        (map catch-error (fluid-ref hooks)))))
+  (fluid-set! hooks '())
   (display "\n")
   (if (srfi1-every null? failures)
     (begin

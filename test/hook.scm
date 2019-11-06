@@ -54,3 +54,14 @@
           (collect-tests
             (lambda () (test (hook (error "test-error")))))))))
   (assert (string-contains output "test-error")))
+
+(test hook-outside-test
+  (define log "")
+  (execute-tests
+    (hook (set! log (string-append log "hook ")))
+    (test
+      (set! log (string-append log "first ")))
+    (test 
+      (set! log (string-append log "second "))))
+  (assert (equal? "first second hook " log)))
+
