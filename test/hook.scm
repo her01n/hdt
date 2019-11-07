@@ -57,11 +57,23 @@
 
 (test hook-outside-test
   (define log "")
-  (execute-tests
-    (hook (set! log (string-append log "hook ")))
-    (test
-      (set! log (string-append log "first ")))
-    (test 
-      (set! log (string-append log "second "))))
-  (assert (equal? "first second hook " log)))
+  (test run
+    (execute-tests
+      (hook (set! log (string-append log "hook ")))
+      (test
+        (set! log (string-append log "first ")))
+      (test 
+        (set! log (string-append log "second "))))
+    (assert (equal? "first second hook " log)))
+  (test failure
+    (define output
+      (with-output-to-string
+        (lambda ()
+          (run-tests
+            (collect-tests
+              (lambda ()
+                (hook (error "hook-error"))
+                (test (assert #t))))))))
+    (assert (string-contains output "hook-error"))))
+
 

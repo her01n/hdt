@@ -81,25 +81,34 @@
 (define (register-hook hook)
   (fluid-set! hooks (cons hook (fluid-ref hooks))))
 
+(define (report failure)
+  (match failure
+    ((backtrace 'assertion-failed (message filename line exprs))
+      (format #t "assertion~a failed:\n" (if message (string-append " \"" message "\"") ""))
+      (for-each (lambda (expr) (format #t "  ~a\n" expr)) exprs)
+      (format #t "~a:~a\n" filename line)
+      (display "\n"))
+    ((backtrace key args)
+      (format #t "error: ~a ~a\n" key args)
+      (format #t "backtrace:\n~a\n" backtrace)
+      (display "\n"))))
+
 (define (run-tests tests)
   (define failures
-    (filter
-      identity
-      (append
-        (map
-          (lambda (test)
-            (with-fluid* hooks '()
-              (lambda ()
-                (define test-error (catch-error (lambda () (test 'execute))))
-                (define hook-errors (map catch-error (fluid-ref hooks)))
-                (define errors (filter identity (cons test-error hook-errors)))
-                (if (null? errors) (display ".") (display "F"))
-                errors)))
-          tests)
-        (map catch-error (fluid-ref hooks)))))
+    (map
+      (lambda (test)
+        (with-fluid* hooks '()
+          (lambda ()
+            (define test-error (catch-error (lambda () (test 'execute))))
+            (define hook-errors (map catch-error (fluid-ref hooks)))
+            (define errors (filter identity (cons test-error hook-errors)))
+            (if (null? errors) (display ".") (display "F"))
+            errors)))
+      tests))
+  (define hook-failures (filter identity (map catch-error (fluid-ref hooks))))
   (fluid-set! hooks '())
   (display "\n")
-  (if (srfi1-every null? failures)
+  (if (and (srfi1-every null? failures) (null? hook-failures))
     (begin
       (format #t "~a ok\n" (n-tests (length tests)))
       #t)
@@ -109,20 +118,13 @@
           (if (not (null? failures))
             (begin
               (format #t "Test ~a failed.\n" (test 'name))
-              (for-each
-                (lambda (failure)
-                  (match failure
-                    ((backtrace 'assertion-failed (message filename line exprs))
-                      (format #t "assertion~a failed:\n" (if message (string-append " \"" message "\"") ""))
-                      (for-each (lambda (expr) (format #t "  ~a\n" expr)) exprs)
-                      (format #t "~a:~a\n" filename line)
-                      (display "\n"))
-                    ((backtrace key args)
-                      (format #t "error: ~a ~a\n" key args)
-                      (format #t "backtrace:\n~a\n" backtrace)
-                      (display "\n"))))
-                failures)))) 
+              (for-each report failures)))) 
         tests failures)
+      (for-each
+        (lambda (failure)
+          (format #t "Error in hook.\n")
+          (report failure))
+        hook-failures)
       (format #t "~a failed.\n" (n-tests (srfi1-count (compose not null?) failures)))
       #f)))
 
