@@ -5,7 +5,7 @@
 
 (test hook
   (define log "")
-  (execute-tests
+  (execute-tests-with-output-to-string
     (test
       (hook
         (set! log (string-append log "hook ")))
@@ -14,7 +14,7 @@
 
 (test hooks
   (define log "")
-  (execute-tests
+  (execute-tests-with-output-to-string
     (test
       (hook
         (set! log (string-append log "first ")))
@@ -24,7 +24,7 @@
 
 (test hook-run-assert-failed
   (define hook-run #f)
-  (execute-tests
+  (execute-tests-with-output-to-string
     (test
       (hook (set! hook-run #t))
       (assert #f)))
@@ -32,7 +32,7 @@
 
 (test hook-run-test-error
   (define hook-run #f)
-  (execute-tests
+  (execute-tests-with-output-to-string
     (test
       (hook (set! hook-run #t))
       (error "test-error")))
@@ -40,7 +40,7 @@
 
 (test hook-run-previous-hook-error
   (define hook-run #f)
-  (execute-tests
+  (execute-tests-with-output-to-string
     (test
       (hook (set! hook-run #t))
       (hook (error "test-error"))))
@@ -48,17 +48,14 @@
 
 (test hook-error-report
   (define output
-    (with-output-to-string
-      (lambda ()
-        (run-tests
-          (collect-tests
-            (lambda () (test (hook (error "test-error")))))))))
+    (execute-tests-with-output-to-string
+      (test (hook (error "test-error")))))
   (assert (string-contains output "test-error")))
 
 (test hook-outside-test
   (define log "")
   (test run
-    (execute-tests
+    (execute-tests-with-output-to-string
       (hook (set! log (string-append log "hook ")))
       (test
         (set! log (string-append log "first ")))
@@ -67,13 +64,8 @@
     (assert (equal? "first second hook " log)))
   (test failure
     (define output
-      (with-output-to-string
-        (lambda ()
-          (run-tests
-            (collect-tests
-              (lambda ()
-                (hook (error "hook-error"))
-                (test (assert #t))))))))
+      (execute-tests-with-output-to-string
+        (hook (error "hook-error"))
+        (test (assert #t))))
     (assert (string-contains output "hook-error"))))
-
 

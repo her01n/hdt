@@ -1,29 +1,23 @@
 (define-module (test inner-definitions))
 
-(use-modules (hdt hdt)
-             (test util))
+(use-modules (hdt hdt))
 
 (test inner-definitions
   (define a-set #f)
-  (define tests
-    (collect-tests
-      (lambda ()
-        (test the-test
-          (define a (begin (set! a-set #t) 2))
-          (assert (equal? a 2))))))
+  (define test-thunk
+    (lambda ()
+      (test the-test
+        (define a (begin (set! a-set #t) 2))
+        (assert (equal? a 2)))))
   (assert (equal? #f a-set) "a is not evaluated before the test run")
   (assert 
-    (with-output-to-port (open-output-string) (lambda () (run-tests tests)))
+    (with-output-to-port (open-output-string) (lambda () (execute-tests test-thunk)))
     "a is defined inside the test"))
 
 (test children-access
-  (define result 
-    (execute-tests
-      (test parent
-        (define a 7)
-        (test child
-          (assert (equal? a 7))))))
-  (assert result "variable is accesible from child test"))
+  (define a 7)
+  (test child
+    (assert (equal? a 7))))
 
 (test inner-procedure
   (define (proc arg)

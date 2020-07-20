@@ -1,4 +1,9 @@
-think of a name for the test framework
-make the documentation
-bin/hdt should return error if test fails
+- allow nested tests inside map and other loops
+- show the arguments for all functions inside assert,
+  not just some selected few (equal?, ...)
+- (assert (not (throws-exception (fun arg)))) should test the the fun does not throw exception
+- think of a better name for the test framework?
+- make the documentation
+  - update to use proper markdown formatting
+- bin/hdt should return error if test fails
 

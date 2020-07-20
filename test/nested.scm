@@ -1,23 +1,17 @@
 (define-module (test nested))
 
-(use-modules (hdt hdt))
+(use-modules (hdt hdt) (test util))
 
-(define log "")
-
-(define nested-tests
-  (collect-tests
-    (lambda ()
-      (test "root"
-        (set! log (string-append log "root "))
-        (test "left"
-          (set! log (string-append log "left ")))
-        (set! log (string-append log "center "))
-        (test "right"
-          (set! log (string-append log "right ")))
-        (set! log (string-append log "finish "))))))
-
-(test "run-nested-tests"
-  (set! log "")
-  (with-output-to-string
-    (lambda () (run-tests nested-tests)))
+(test run-nested-tests
+  (define log "")
+  (execute-tests-with-output-to-string
+    (test "root"
+      (set! log (string-append log "root "))
+      (test "left"
+        (set! log (string-append log "left ")))
+      (set! log (string-append log "center "))
+      (test "right"
+        (set! log (string-append log "right ")))
+      (set! log (string-append log "finish "))))
   (assert (equal? "root left root center right root center finish " log) "nested tests are executed"))
+

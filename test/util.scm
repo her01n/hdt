@@ -1,11 +1,13 @@
 (define-module (test util)
-  #:export-syntax (execute-tests))
+  #:export-syntax (execute-tests-with-output-to-string))
 
 (use-modules (hdt hdt))
 
-(define-syntax execute-tests
+(define-syntax execute-tests-with-output-to-string
   (syntax-rules ()
-    ((execute-tests tests ...)
-      (with-output-to-port (open-output-string)
-        (lambda ()
-          (run-tests (collect-tests (lambda () tests ...))))))))
+    ((execute-tests-with-output-to-string tests ...)
+     (with-output-to-string
+       (lambda ()
+         (execute-tests
+           (lambda () tests ...)))))))
+

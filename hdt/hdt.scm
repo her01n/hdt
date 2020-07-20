@@ -1,9 +1,12 @@
 (define-module (hdt hdt)
-  #:export (run-tests collect-tests test-runner)
+  #:export (execute-tests test-runner)
   #:export-syntax (assert test hook throws-exception))
 
 (use-modules (ice-9 ftw) (ice-9 match)
              ((srfi srfi-1) #:prefix srfi1-))
+
+(define (execute-tests thunk)
+  (run-tests (collect-tests thunk)))
 
 (define (collect-tests thunk)
   (set! tests (cons '() tests))
