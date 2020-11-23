@@ -1,9 +1,12 @@
-- allow nested tests inside map and other loops
+- run the parent test before the children, if the parent fails, skip the children
+- on interactive terminal, instead of printing dots, display the current test name
+- if a test module loads another test module, do not run the second module tests twice
 - show the arguments for all functions inside assert,
   not just some selected few (equal?, ...)
+  we should also be smart and only evaluate the argument when it is requested (expand to a function call)
 - (assert (not (throws-exception (fun arg)))) should test the the fun does not throw exception
+- add an option to not display test output, only in case the test fails.
 - think of a better name for the test framework?
 - make the documentation
   - update to use proper markdown formatting
-- bin/hdt should return error if test fails
 

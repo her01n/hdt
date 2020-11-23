@@ -2,4 +2,4 @@
 
 GUILE=${GUILE-guile}
 HDT_PATH=$(dirname $(dirname $(realpath -s $0)))
-$GUILE -L $HDT_PATH -L . -c "(begin (use-modules (hdt hdt)) (test-runner))"
+$GUILE -L $HDT_PATH -L . -c "(begin (use-modules (hdt hdt)) (test-runner))" $@
