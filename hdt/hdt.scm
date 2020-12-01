@@ -1,5 +1,5 @@
 (define-module (hdt hdt)
-  #:export (execute-tests test-runner)
+  #:export (execute-tests)
   #:export-syntax (assert test hook throws-exception))
 
 (use-modules (ice-9 ftw) (ice-9 getopt-long) (ice-9 match)
@@ -185,60 +185,6 @@
             (check
               #`(if (not check) (throw 'assertion-failed message #,filename #,line (list #,expr)))))))
       ((assert check) #`(assert check #f)))))
-
-(define (pass . args)
-  (match args
-    ((path stat result) result)
-    ((error path stat errno result) result)))
-
-(define (find-files)
-  (file-system-fold
-    (const #t)
-    (lambda (path stat result) (if (string-suffix? ".scm" path) (cons path result) result))
-    pass
-    pass
-    pass
-    pass
-    '()
-    "test"))
-
-(define (run-tests-in-files files)
-  (if
-    (run-tests
-      (collect-tests
-        (lambda () (map load-from-path files))))
-    (exit 0)
-    (exit 1)))
-  
-(define options-spec
-  '((help (single-char #\h))
-    (usage (single-char #\u))
-    (version (single-char #\v))))
-
-(define (test-runner)
-  (define options (getopt-long (command-line) options-spec))
-  (cond
-    ((or (option-ref options 'help #f) (option-ref options 'usage #f))
-     (format #t "Automatic test framework for guile.\n")
-     (format #t "Usage:\n")
-     (format #t "  hdt --help\n")
-     (format #t "  hdt --version\n")
-     (format #t "  hdt [test-file ...]\n")
-     (format #t "\n")
-     (format #t "  hdt --help\n")
-     (format #t "    Display this help and exit.\n\n")
-     (format #t "  hdt --version\n")
-     (format #t "    Display program version and exit.\n\n")
-     (format #t "  hdt [test-file ...]\n")
-     (format #t "    Execute tests in given file(s).\n")
-     (format #t "    If no files are given, execute tests in all files in 'test' directory.\n")
-     (format #t "    Return success if all test passes, failure otherwise.\n"))
-    ((option-ref options 'version #f)
-     (format #t "hdt version 0.1\n"))
-    ((pair? (option-ref options '() '()))
-     (run-tests-in-files (option-ref options '() '())))
-    (else
-     (run-tests-in-files (find-files)))))
 
 ; just for completeness.
 ; it is not used in normal usage: (assert (throws-exception ...))
