@@ -5,8 +5,8 @@
 (use-modules (ice-9 ftw) (ice-9 getopt-long) (ice-9 match)
              ((srfi srfi-1) #:prefix srfi1-))
 
-(define (execute-tests thunk)
-  (run-tests (collect-tests thunk)))
+(define* (execute-tests thunk #:key show)
+  (run-tests (collect-tests thunk) #:show show))
 
 (define (collect-tests thunk)
   (set! tests (cons '() tests))
@@ -96,15 +96,29 @@
       (format #t "backtrace:\n~a\n" backtrace)
       (display "\n"))))
 
-(define (run-tests tests)
+; run a single test, including hooks and return the errors
+(define* (run-test test #:key show)
+  (define (run)
+    (define test-error (catch-error (lambda () (test 'execute))))
+    (define hook-errors (map catch-error (fluid-ref hooks)))
+    (define errors (filter identity (cons test-error hook-errors)))
+    errors)
+  (if show
+    (run)
+    ((lambda ()
+      (define output (open-output-string))
+      (define errors (with-output-to-port output run))
+      (if (not (null? errors)) (display (get-output-string output)))
+      (close-port output)
+      errors))))
+
+(define* (run-tests tests #:key show)
   (define failures
     (map
       (lambda (test)
         (with-fluid* hooks '()
           (lambda ()
-            (define test-error (catch-error (lambda () (test 'execute))))
-            (define hook-errors (map catch-error (fluid-ref hooks)))
-            (define errors (filter identity (cons test-error hook-errors)))
+            (define errors (run-test test #:show show))
             (if (null? errors) (display ".") (display "F"))
             errors)))
       tests))

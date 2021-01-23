@@ -117,11 +117,18 @@ use GUILE environment variable. For example:
 
    $ env GUILE=guile2.0 hdt 
 
-## open points
+## TODO
 
-More functions need to get special treatment by assert macro.
-Skip running following nested tests if the root tets fails. Report the number of skipped tests.
-Allow nested tests inside 'map', 'if', 'foreach', and similar. This will require to rework the way
-  the tests are registered. create function (execute-tests thunk) that will execute the tests defined inside the thunk?
-Collect the output of the tests, do not display it immediately, only display it in case of failure.
+- run the parent test before the children, if the parent fails, skip the children
+- on interactive terminal, instead of printing dots, display the current test name
+- if a test module loads another test module, do not run the second module tests twice
+- show the arguments for all functions inside assert,
+  not just some selected few (equal?, ...)
+  we should also be smart and only evaluate the argument when it is requested (expand to a function call)
+- (assert (not (throws-exception (fun arg)))) should test the the fun does not throw exception
+- think of a better name for the test framework?
+- make the documentation
+  - update to use proper markdown formatting
+- Allow nested tests inside 'map', 'if', 'foreach', and similar. This will require to rework the way
+  the tests are registered?
 
