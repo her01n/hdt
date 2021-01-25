@@ -16,7 +16,7 @@
     (lambda ()
       (format #t "(use-modules (hdt hdt))\n")
       (format #t "(test success (format #t \"success!\\n\"))")))
-  (let* ((pipe (open-input-pipe "cd tmp; ../bin/hdt --show-output success.scm"))
+  (let* ((pipe (open-input-pipe "cd tmp; ../bin/hdt success.scm"))
          (output (get-string-all pipe)))
     (assert (string-contains output "success!"))
     (close-port pipe)))
