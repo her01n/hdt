@@ -103,14 +103,17 @@
     (define hook-errors (map catch-error (fluid-ref hooks)))
     (define errors (filter identity (cons test-error hook-errors)))
     errors)
+  (define (hide-output)
+    (define output (open-output-string))
+    (define errors (with-output-to-port output run))
+    (if (not (null? errors)) (display (get-output-string output)))
+    ; XXX Under some conditions (multi thread),
+    ; standard function may write to a port that is no longer the current output port.
+    ; We rely on garbage collection to close the port.
+    errors)
   (if show
     (run)
-    ((lambda ()
-      (define output (open-output-string))
-      (define errors (with-output-to-port output run))
-      (if (not (null? errors)) (display (get-output-string output)))
-      (close-port output)
-      errors))))
+    (hide-output)))
 
 (define* (run-tests tests #:key show)
   (define failures

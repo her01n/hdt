@@ -119,6 +119,8 @@ use GUILE environment variable. For example:
 
 ## TODO
 
+- fix hiding output: use set-current-output-port instead of with-output-to-port
+  make showing output the default, add --hide-output option
 - run the parent test before the children, if the parent fails, skip the children
 - on interactive terminal, instead of printing dots, display the current test name
 - if a test module loads another test module, do not run the second module tests twice
