@@ -18,22 +18,17 @@
   (assert (string-contains output "(equal? 0 1)") "assertion expression")
   (assert (string-contains output "failed") "'failed' string"))
 
-(test "expand-equal"
-  (define output
-    (execute-tests-with-output-to-string
-      (test "equal"
-        (define a "actual")
-        (assert (equal? "expected" a)))))
-  (assert (string-contains output "\"actual\"") "equal? arguments are expanded")
-  (assert (string-contains output "(equal? \"expected\" a)") "original expression is also displayed"))
+(define (my-equal? a b)
+  (equal? a b))
 
-(test "expand-string-contains"
+(test "expand-function-arguments"
   (define output
     (execute-tests-with-output-to-string
-      (test "string-contains"
-        (define h "hay")
-        (assert (string-contains h "needle")))))
-  (assert (string-contains output "hay") "string-contain arguments are expanded"))
+      (test
+        (define a "value-a")
+        (define b "value-b")
+        (assert (my-equal? a b)))))
+  (assert (string-contains output "value-a")))
 
 (test "expand-not"
   (define output
@@ -43,11 +38,20 @@
         (assert (not value)))))
   (assert (string-contains output "hey") "not argument is expanded"))
 
-(test "expand-member"
+(test "expand-macro-arguments"
   (define output
     (execute-tests-with-output-to-string
-      (test "member"
-        (define f "foo")
-        (assert (member f '("bar" "baz"))))))
-  (assert (string-contains output "foo") "member's first argument is expanded"))
+      (test
+        (define a "value-a")
+        (assert (and a #f)))))
+  (assert (string-contains output "value-a")))
+
+(test "do-not-evaluate-arguments"
+  (define called #f)
+  (define (do-not-call) (set! called #t))
+  (define output
+    (execute-tests-with-output-to-string
+      (test
+        (assert (and #f (do-not-call))))))
+  (assert (not called)))
 

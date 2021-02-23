@@ -119,13 +119,21 @@ use GUILE environment variable. For example:
 
 ## TODO
 
+- show the arguments for nested function calls in assert:
+
+      (define a 4)
+      (assert (not (< a 6)))
+
+  =>
+
+      (assert (not #t))
+      (assert (not (< 4 6))) 
+
 - run the parent test before the children, if the parent fails, skip the children
 - on interactive terminal, instead of printing dots, display the current test name
 - if a test module loads another test module, do not run the second module tests twice
-- show the arguments for all functions inside assert,
-  not just some selected few (equal?, ...)
-  we should also be smart and only evaluate the argument when it is requested (expand to a function call)
-- (assert (not (throws-exception (fun arg)))) should test the the fun does not throw exception
+- (assert (not (throws-exception value)))
+  should display the exception in case of failure
 - think of a better name for the test framework?
 - make the documentation
   - update to use proper markdown formatting

@@ -88,7 +88,7 @@
   (match failure
     ((backtrace 'assertion-failed (message filename line exprs))
       (format #t "assertion~a failed:\n" (if message (string-append " \"" message "\"") ""))
-      (for-each (lambda (expr) (format #t "  ~a\n" expr)) exprs)
+      (for-each (lambda (expr) (format #t "  ~s\n" expr)) exprs)
       (format #t "~a:~a\n" filename line)
       (display "\n"))
     ((backtrace key args)
@@ -161,22 +161,18 @@
           (return-error (list backtrace key args))))
       #f)))
 
-(define (execute-check message filename line expr proc . args)
-  (if (not (apply proc args))
-    (let ((proc (procedure-name proc))
-          (args (string-join (map (lambda (arg) (format #f "~s" arg)) args) " ")))
-      (throw 'assertion-failed message filename line (list expr (format #f "(~a ~a)" proc args))))))
+(define (execute-check message filename line thunk description)
+  (if (not (thunk))
+    (throw 'assertion-failed message filename line description)))
 
-(define (execute-throws-check message filename line expr thunk)
-  (define value
-    (catch #t
-      (lambda () (thunk))
-      (lambda (key . args) 'hdt-exception)))
-  (if (not (equal? 'hdt-exception value))
-    (throw 'assertion-failed message filename line (list expr (format #f "(throws-exception ~a)" value)))))
-
-; TODO expand all procedures - can i tell what is a procedure and what an expanded macro?
-; does it matter?
+(define-syntax lambdas
+  (syntax-rules ()
+    ((lambdas form values) form)
+    ((lambdas (form* ...) values arg arg* ...)
+     (lambdas
+       (form* ... ((lambda () (define value arg) (list-set! values 0 value) value)))
+       (cdr values)
+       arg* ...))))
 
 (define-syntax assert
   (lambda (x)
@@ -184,31 +180,24 @@
     (define filename (assoc-ref source 'filename))
     (define line (+ 1 (assoc-ref source 'line)))
     (syntax-case x ()
+      ((assert (proc arg* ...) message)
+       #`((lambda ()
+            (define values (map (const '*not-evaluated) '(arg* ...)))
+            (execute-check
+              message #,filename #,line
+              (lambda () (lambdas (proc) values arg* ...))
+              (list (quote (proc arg* ...)) (cons (quote proc) values))))))
       ((assert check message)
-        (let ((expr (with-output-to-string (lambda () (write (syntax->datum (syntax check)))))))
-          (syntax-case (syntax check) (equal? string-contains not throws-exception member srfi1-member)
-            ((equal? arg1 arg2)
-              #`(execute-check message #,filename #,line #,expr equal? arg1 arg2))
-            ((string-contains arg1 arg2)
-              #`(execute-check message #,filename #,line #,expr string-contains arg1 arg2))
-            ((not arg)
-              #`(execute-check message #,filename #,line #,expr not arg))
-	    ((throws-exception arg)
-	      #`(execute-throws-check message #,filename #,line #,expr (lambda () arg)))
-            ((member arg1 arg2)
-              #`(execute-check message #,filename #,line #,expr member arg1 arg2))
-            ((srfi1-member arg1 arg2)
-              #`(execute-check message #,filename #,line #,expr srfi1-member arg1 arg2))
-            (check
-              #`(if (not check) (throw 'assertion-failed message #,filename #,line (list #,expr)))))))
+       #`(execute-check
+           message #,filename #,line
+           (lambda () check)
+           (list (quote check))))
       ((assert check) #`(assert check #f)))))
 
-; just for completeness.
-; it is not used in normal usage: (assert (throws-exception ...))
 (define-syntax throws-exception
   (syntax-rules ()
     ((throws-exception expr)
       (catch #t
         (lambda () expr #f)
-        (lambda (key . args) #t)))))
+        (lambda (key . args) #t))))) 
 
