@@ -25,7 +25,7 @@
 
 (define* (run-tests-in-files files #:key show)
   (if
-    (execute-tests (lambda () (map load files)) #:show show)
+    (execute-tests (lambda () (map primitive-load files)) #:show show)
     (exit 0)
     (exit 1)))
   
