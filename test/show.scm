@@ -2,21 +2,21 @@
 
 (use-modules (hdt hdt))
 
-(test silent
+(test "silent"
   (define output
     (with-output-to-string
        (lambda ()
          (execute-tests
            (lambda ()
-             (test success
+             (test "success"
                (display "success\n"))
-             (test failure
+             (test "failure"
                (display "failure\n")
                (assert #f)))))))
   (assert (not (string-contains output "success")))
   (assert (string-contains output "failure")))
 
-(test show
+(test "show"
   (define output
     (with-output-to-string
       (lambda ()

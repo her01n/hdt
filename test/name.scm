@@ -6,17 +6,11 @@
   (hdt hdt)
   (test util))
 
-(test string-name
+(test "named"
   (define output
     (execute-tests-with-output-to-string
       (test "the name" (assert #f))))
   (assert (string-contains output "the name")))
-
-(test symbol-name
-  (define output
-    (execute-tests-with-output-to-string
-      (test the-name (assert #f))))
-  (assert (string-contains output "the-name")))
 
 (test anonymous
   (define output
@@ -24,9 +18,9 @@
       (test (assert #f))))
   (assert (string-contains output "failed")))
 
-(test nested
+(test "nested"
   (define output
     (execute-tests-with-output-to-string
-      (test parent (test child (assert #f)))))
+      (test "parent" (test "child" (assert #f)))))
   (assert (string-contains output "parent/child")))
 

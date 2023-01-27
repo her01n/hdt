@@ -8,9 +8,9 @@
     (assert #f "This test should not be executed")))
 
 (when #f
-  (test first
+  (test "first"
     (assert #f))
-  (test second
+  (test "second"
     (assert #f)))
 
 (define run #f)

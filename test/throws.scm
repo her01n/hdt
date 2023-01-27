@@ -2,11 +2,11 @@
 
 (use-modules (hdt hdt) (test util))
 
-(test throws 
-  (test pass
+(test "throws-exception" 
+  (test "pass"
     (assert (throws-exception (/ 1 0)))
-    (assert (not (throws-exception (+ 1 1)))))
-  (test failure
+    (assert (not (throws-exception (+ 1 0)))))
+  (test "failure"
     (assert
       (not
         (with-output-to-port (open-output-string)
@@ -14,7 +14,7 @@
             (execute-tests
               (lambda ()
                 (test (assert (throws-exception (+ 1 1)))))))))))
-  (test display-value
+  (test "display-value"
     (define output
       (execute-tests-with-output-to-string
         (test (assert (throws-exception (+ 1 1))))))

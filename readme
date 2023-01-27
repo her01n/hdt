@@ -30,7 +30,7 @@ This way, additional macros like assert-equal are not necessary.
 
   test macro
 
-syntax: (test [name] expr...)
+syntax: (test ["name"] expr...)
 
 Register a test to be consisted of the expressions. The test is considered passing 
 if evaluating expressions does not throw any exceptions and all assertions passes. 

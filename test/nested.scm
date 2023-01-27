@@ -2,7 +2,7 @@
 
 (use-modules (hdt hdt) (test util))
 
-(test run-nested-tests
+(test "run-nested-tests"
   (define log "")
   (execute-tests-with-output-to-string
     (test "root"

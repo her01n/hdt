@@ -2,7 +2,7 @@
 
 (use-modules (hdt hdt))
 
-(test inner-definitions
+(test "inner-definitions"
   (define a-set #f)
   (define test-thunk
     (lambda ()
@@ -14,12 +14,12 @@
     (with-output-to-port (open-output-string) (lambda () (execute-tests test-thunk)))
     "a is defined inside the test"))
 
-(test children-access
+(test "children-access"
   (define a 7)
   (test child
     (assert (equal? a 7))))
 
-(test inner-procedure
+(test "inner-procedure"
   (define (proc arg)
     (assert (equal? arg "arg"))
     "result")

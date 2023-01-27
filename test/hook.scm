@@ -3,7 +3,7 @@
 (use-modules (hdt hdt)
              (test util))
 
-(test hook
+(test "hook"
   (define log "")
   (execute-tests-with-output-to-string
     (test
@@ -12,7 +12,7 @@
       (set! log (string-append log "test "))))
   (assert (equal? "test hook " log)))
 
-(test hooks
+(test "hooks"
   (define log "")
   (execute-tests-with-output-to-string
     (test
@@ -22,7 +22,7 @@
         (set! log (string-append log "second ")))))
   (assert (equal? "second first " log)))
 
-(test hook-run-assert-failed
+(test "hook-run-assert-failed"
   (define hook-run #f)
   (execute-tests-with-output-to-string
     (test
@@ -30,7 +30,7 @@
       (assert #f)))
   (assert hook-run))
 
-(test hook-run-test-error
+(test "hook-run-test-error"
   (define hook-run #f)
   (execute-tests-with-output-to-string
     (test
@@ -38,7 +38,7 @@
       (error "test-error")))
   (assert hook-run))
 
-(test hook-run-previous-hook-error
+(test "hook-run-previous-hook-error"
   (define hook-run #f)
   (execute-tests-with-output-to-string
     (test
@@ -46,15 +46,15 @@
       (hook (error "test-error"))))
   (assert hook-run))
 
-(test hook-error-report
+(test "hook-error-report"
   (define output
     (execute-tests-with-output-to-string
       (test (hook (error "test-error")))))
   (assert (string-contains output "test-error")))
 
-(test hook-outside-test
+(test "hook-outside-test"
   (define log "")
-  (test run
+  (test "run"
     (execute-tests-with-output-to-string
       (hook (set! log (string-append log "hook ")))
       (test
@@ -62,7 +62,7 @@
       (test 
         (set! log (string-append log "second "))))
     (assert (equal? "first second hook " log)))
-  (test failure
+  (test "failure"
     (define output
       (execute-tests-with-output-to-string
         (hook (error "hook-error"))
